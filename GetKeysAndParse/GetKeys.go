@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -39,15 +40,16 @@ func main() {
 			break
 		}
 		fmt.Print(read_line + "\n")
-		go processUser(read_line)
+		go processUser(read_line, con)
 	}
 	ff.Close()
 	Wait := time.NewTimer(time.Second * 4)
 	<-Wait.C
 }
 
-func processUser(username string) {
+func processUser(username string, con *sql.DB) {
 	rawkeys := getURL("https://github.com/" + username + ".keys")
+	readKeys(rawkeys, username, con)
 	fmt.Print(rawkeys)
 	// First we will need to read the keys
 
@@ -58,20 +60,21 @@ func getURL(url string) string {
 	trans := &http.Transport{TLSClientConfig: conf}
 	client := &http.Client{Transport: trans}
 	resp, err := client.Get(url)
-	if err != nil {
-		panic(err)
-	}
+	check(err)
 	defer resp.Body.Close()
 	body, _ := ioutil.ReadAll(resp.Body)
 	return string(body)
 }
 
-func readKeys(keychain string) {
-
+func readKeys(keychain string, username string, con *sql.DB) {
+	for _, keystr := range strings.Split(keychain, "\n") {
+		keysiz := getKeySize(keystr)
+		storeKey(username, keystr, keysiz, con)
+	}
 }
 
 func getKeySize(key string) int {
-	return 1
+	return int(1)
 }
 
 func WriteFile(path string, contents string) {
@@ -87,6 +90,7 @@ func check(e error) {
 	}
 }
 
-func storeKey(username string, key string, keylen int, con sql.DB) {
-
+func storeKey(username string, key string, keylen int, con *sql.DB) {
+	_, e := con.Exec("INSERT INTO `random`.`githubkeys` (`username`, `key`) VALUES (?, ?);", username, key)
+	check(e)
 }
