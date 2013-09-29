@@ -45,6 +45,7 @@ func main() {
 		}
 		fmt.Print(read_line + "\n")
 		go processUser(read_line, con)
+		time.sleep(time.Second)
 	}
 	ff.Close()
 	Wait := time.NewTimer(time.Second * 4)
