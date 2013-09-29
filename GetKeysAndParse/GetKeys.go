@@ -9,6 +9,8 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"os/exec"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -74,7 +76,19 @@ func readKeys(keychain string, username string, con *sql.DB) {
 }
 
 func getKeySize(key string) int {
-	return int(1)
+	WriteFile("./tmp.key", key)
+	app := "ssh-keygen"
+	arg0 := "-l"
+	arg1 := "-f"
+	arg2 := "./tmp.key"
+
+	cmd := exec.Command(app, arg0, arg1, arg2, arg3)
+	out, err := cmd.Output()
+	check(err)
+	parts := strings.Split(out, " ")
+	i, err := strconv.Atoi(parts[0])
+	check(err)
+	return int(i)
 }
 
 func WriteFile(path string, contents string) {
