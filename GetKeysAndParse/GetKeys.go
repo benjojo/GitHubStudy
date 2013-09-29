@@ -2,8 +2,10 @@ package main
 
 import (
 	"bufio"
+	"crypto/sha1"
 	"crypto/tls"
 	"database/sql"
+	"encoding/base64"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	"io/ioutil"
@@ -78,11 +80,11 @@ func readKeys(keychain string, username string, con *sql.DB) {
 }
 
 func getKeySize(key string) int {
-	WriteFile("./tmp.key", key)
+	WriteFile("./"+SHAHash(key)+".key", key)
 	app := "ssh-keygen"
 	arg0 := "-l"
 	arg1 := "-f"
-	arg2 := "./tmp.key"
+	arg2 := "./" + SHAHash(key) + ".key"
 
 	cmd := exec.Command(app, arg0, arg1, arg2)
 	out, err := cmd.Output()
@@ -90,6 +92,7 @@ func getKeySize(key string) int {
 	parts := strings.Split(string(out), " ")
 	i, err := strconv.Atoi(parts[0])
 	check(err)
+	os.Remove(arg2)
 	return int(i)
 }
 
@@ -104,6 +107,13 @@ func check(e error) {
 	if e != nil {
 		panic(e)
 	}
+}
+
+func SHAHash(input string) string {
+	hasher := sha1.New()
+	hasher.Write([]byte(input))
+	sha := base64.URLEncoding.EncodeToString(hasher.Sum(nil))
+	return string(sha)
 }
 
 func storeKey(username string, key string, keylen int, con *sql.DB) {
