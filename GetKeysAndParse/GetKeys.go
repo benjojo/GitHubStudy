@@ -82,10 +82,10 @@ func getKeySize(key string) int {
 	arg1 := "-f"
 	arg2 := "./tmp.key"
 
-	cmd := exec.Command(app, arg0, arg1, arg2, arg3)
+	cmd := exec.Command(app, arg0, arg1, arg2)
 	out, err := cmd.Output()
 	check(err)
-	parts := strings.Split(out, " ")
+	parts := strings.Split(string(out), " ")
 	i, err := strconv.Atoi(parts[0])
 	check(err)
 	return int(i)
