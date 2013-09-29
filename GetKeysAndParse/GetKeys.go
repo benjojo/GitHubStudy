@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"time"
 )
 
 func main() {
@@ -18,11 +19,15 @@ func main() {
 			break
 		}
 		fmt.Print(read_line + "\n")
-		fmt.Print(getURL("https://github.com/" + read_line + ".keys"))
-
+		go processUser(read_line)
 	}
-
 	ff.Close()
+	Wait := time.NewTimer(time.Second * 4)
+	<-Wait.C
+}
+
+func processUser(username string) {
+	fmt.Print(getURL("https://github.com/" + username + ".keys"))
 }
 
 func getURL(url string) string {
