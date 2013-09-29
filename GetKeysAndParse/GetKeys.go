@@ -89,11 +89,24 @@ func getKeySize(key string) int {
 
 	cmd := exec.Command(app, arg0, arg1, arg2)
 	out, err := cmd.Output()
-	check(err)
-	parts := strings.Split(string(out), " ")
-	i, err := strconv.Atoi(parts[0])
-	check(err)
-	os.Remove(arg2)
+
+	res := "nope"
+	i := 0
+	if err != nil {
+		parts := strings.Split(string(out), " ")
+		ii, err := strconv.Atoi(parts[0])
+		i = ii
+		if err != nil {
+			i = 0
+		}
+		res = "yup"
+	} else {
+		return int(1)
+	}
+
+	if res == "nope" {
+		i = 0
+	}
 	return int(i)
 }
 
