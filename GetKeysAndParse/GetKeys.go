@@ -47,7 +47,10 @@ func main() {
 }
 
 func processUser(username string) {
-	fmt.Print(getURL("https://github.com/" + username + ".keys"))
+	rawkeys := getURL("https://github.com/" + username + ".keys")
+	fmt.Print(rawkeys)
+	// First we will need to read the keys
+
 }
 
 func getURL(url string) string {
@@ -82,4 +85,8 @@ func check(e error) {
 	if e != nil {
 		panic(e)
 	}
+}
+
+func storeKey(username string, key string, keylen int, con sql.DB) {
+
 }
