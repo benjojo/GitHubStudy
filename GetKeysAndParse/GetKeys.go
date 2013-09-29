@@ -70,8 +70,10 @@ func getURL(url string) string {
 
 func readKeys(keychain string, username string, con *sql.DB) {
 	for _, keystr := range strings.Split(keychain, "\n") {
-		keysiz := getKeySize(keystr)
-		storeKey(username, keystr, keysiz, con)
+		if keystr != "" {
+			keysiz := getKeySize(keystr)
+			storeKey(username, keystr, keysiz, con)
+		}
 	}
 }
 
@@ -105,6 +107,6 @@ func check(e error) {
 }
 
 func storeKey(username string, key string, keylen int, con *sql.DB) {
-	_, e := con.Exec("INSERT INTO `random`.`githubkeys` (`username`, `key`) VALUES (?, ?);", username, key)
+	_, e := con.Exec("INSERT INTO `random`.`githubkeys` (`username`, `keylen`, `key`) VALUES (?, ?, ?);", username, keylen, key)
 	check(e)
 }
